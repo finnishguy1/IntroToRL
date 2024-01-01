@@ -1,2 +1,2 @@
 # IntroToRL
-Exercises from book introduction to reinforcment learning
+Exercises for the book Introduction To Reinforcment Learning
