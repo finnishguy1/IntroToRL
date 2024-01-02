@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from random import choice
+from math import floor
 
 def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
@@ -27,6 +28,8 @@ class environment:
         return self.finish
         
     def move(self):
+        oldY = self.y
+        oldX = self.x
         self.y -= self.dy
         self.x += self.dx
         inside = self.isWithinBound()
@@ -39,6 +42,23 @@ class environment:
         else:
             print("you lose") #reset y and x to a random starting pos, yaya
 
+    #checks to make sure projeceted path is all within bounds
+    def projectedPath(self, oldY, oldX):
+        #cus rounding in python got me bricked
+        def normal_round(value):
+            return floor(value + 0.5)
+        
+        Projected = []
+        deltaX = self.dx/(self.dx+self.dy)
+        deltaY = self.dy/(self.dx+self.dy)
+        for i in range(self.dx+self.dy):
+            oldX += deltaX
+            oldY -= deltaY
+            Projected.append((normal_round(oldY),normal_round(oldX)))
+        if set(Projected).issubset(self.map):
+            print("yay")
+        else:
+            print("wuh uh")
 
 
     def Action(self, ndy, ndx):
@@ -56,7 +76,7 @@ def newStart():
 raceTrack = defaultdict(newStart)
 StartingPos = []
 n, m = (0, 0)
-with open("IntroToRL/map.txt","r") as f:
+with open("map.txt","r") as f:
     content = f.read()
     n = len(content.split("\n"))
     for i, line in enumerate(content.split("\n")):
