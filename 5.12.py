@@ -17,8 +17,8 @@ def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
 
 def allValidActions(i):
-    velocityx, velocityy = i[0][1][1], i[0][1][0]
-    return list(filter(lambda a: (0<a[0]+velocityy <= 5 and 0<=a[1]+velocityx<=5) or (0<=a[0]+velocityy<=5 and 0<a[1]+velocityx<=5)))
+    velocityx, velocityy = i[1][1], i[1][0]
+    return list(filter(lambda a: (0<a[0]+velocityy <= 5 and 0<=a[1]+velocityx<=5) or (0<=a[0]+velocityy<=5 and 0<a[1]+velocityx<=5), allActions()))
 
 
 class environment:
@@ -45,6 +45,8 @@ class environment:
                 return 1
             elif finished == False:
                 self.y, self.x = raceTrack[self.y, self.x]
+                return 0
+            else:
                 return 0
         except:
             return 0
@@ -111,6 +113,7 @@ def targetPolicyFilter(q, i):
         return False
 
 def main():
+    iterations = 0
     q = {}    
     C = {}
     newq = {}
@@ -121,8 +124,38 @@ def main():
 
     for i in allStates():
         newq = {}
-        for a in allActions():
-            newq = q(i, a)
+        for a in allValidActions(i):
+            newq[i,a] = q[i, a]
+        targetPolicy[i] = max(newq, key=newq.get)[1]
+
+    while iterations < 1:
+        game = environment(0,0, 9,0,raceTrack, StartingPos)
+        b = {}
+        for i in allStates():
+            newA = []
+            for a in allValidActions(i):
+                newA.append(a)
+            b[i] = newA
+        G = 0
+        W = 1
+        R = -1
+        sar = []
+        playing = True
+        while playing:
+            state = game.state()
+            action = choice(b[state])
+            game.Action(action[0], action[1])
+            ret = game.move()
+            sar.append((state, action, -1))
+            if ret == 1:
+                playing = False
+            
+        
+
+        print(len(sar))
+        break
+        iterations += 1 
+
         
 
 
