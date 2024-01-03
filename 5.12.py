@@ -139,7 +139,7 @@ def main():
             newq[i,a] = q[i, a]
         targetPolicy[i] = max(newq, key=newq.get)[1]
 
-    while iterations < 1000:
+    while iterations < 100000:
         y,x = StartingPos[randint(0, len(StartingPos)-1)]
         game = environment(0,0, y,x,raceTrack, StartingPos)
         G = 0
@@ -159,15 +159,17 @@ def main():
         
 
         for val in reversed(sar):
+            if W == 0:
+                break
             G = gamma*G + val[2]
             C[(val[0],val[1])] += W  
-            q[(val[0],val[1])] = q[(val[0],val[1])] + W/C[(val[0],val[1])] * (G-q[(val[0],val[1])])
+            q[(val[0],val[1])] += W/C[(val[0],val[1])] * (G-q[(val[0],val[1])])
             newq = {}
             for a in allValidActions(val[0]):
                 newq[(val[0], val[1])] = q[(val[0],val[1])]
             targetPolicy[val[0]] = max(newq, key=newq.get)[1]
             if val[1] == targetPolicy[val[0]]:
-                W *= len(b[state]) 
+                W *= 1/len(b[state]) 
             else:
                 break
 
@@ -180,8 +182,8 @@ def main():
     playing = True
     while playing:
         state = game.state()
-        print(state)
         action = targetPolicy[state]
+        print(action)
         game.Action(action[0], action[1])
         ret = game.move()
         if ret == 1:
