@@ -4,14 +4,22 @@ from collections import defaultdict
 from random import choice
 from itertools import product
 
+def allQ():
+    return list(product(allStates(), allActions()))
+
 def allStates():
    return list(product(product(np.arange(n), np.arange(m)), product(np.arange(6), np.arange(6)))) 
 
 def allActions():
-    return list(np.product(np.arange(-1,2), np.arange(-1,2)))
+    return list(product(np.arange(-1,2), np.arange(-1,2)))
 
 def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
+
+def allValidActions(i):
+    velocityx, velocityy = i[0][1][1], i[0][1][0]
+    return list(filter(lambda a: (0<a[0]+velocityy <= 5 and 0<=a[1]+velocityx<=5) or (0<=a[0]+velocityy<=5 and 0<a[1]+velocityx<=5)))
+
 
 class environment:
 
@@ -23,7 +31,9 @@ class environment:
         self.map = map
         self.startingPos = startingPos
 
-        
+    def state(self):
+        return ((self.y, self.x), (self.dy, self.dx))        
+
     def move(self):
         oldY = self.y
         oldX = self.x
@@ -92,14 +102,32 @@ with open("IntroToRL/map.txt","r") as f:
                 StartingPos.append((i,j))
 
 
-
+#filters away actions from q
+def targetPolicyFilter(q, i):
+    key, value = q
+    if key[0] == i:
+        return True
+    else:
+        return False
 
 def main():
-    pata = environment(1, 1, 2, 23, raceTrack, StartingPos)
-    pata.move()
-    pata.move()
-    print(allStates())
-    
+    q = {}    
+    C = {}
+    newq = {}
+    targetPolicy = {}
+    for i in allQ():
+        q[i] = 0.0
+        C[i] = 0.0
+
+    for i in allStates():
+        newq = {}
+        for a in allActions():
+            newq = q(i, a)
+        
+
+
+
+
 
 
 
