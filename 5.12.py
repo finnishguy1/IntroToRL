@@ -1,15 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
-from random import choice
+from random import choice, randint
 from itertools import product
-
+from functools import lru_cache
+@lru_cache
 def allQ():
     return list(product(allStates(), allActions()))
 
+@lru_cache
 def allStates():
    return list(product(product(np.arange(n), np.arange(m)), product(np.arange(6), np.arange(6)))) 
 
+@lru_cache
 def allActions():
     return list(product(np.arange(-1,2), np.arange(-1,2)))
 
@@ -87,7 +90,7 @@ def newStart():
 raceTrack = defaultdict(newStart)
 StartingPos = []
 n, m = (0, 0)
-with open("IntroToRL/map.txt","r") as f:
+with open("map.txt","r") as f:
     content = f.read()
     n = len(content.split("\n"))
     for i, line in enumerate(content.split("\n")):
@@ -113,9 +116,17 @@ def targetPolicyFilter(q, i):
         return False
 
 def main():
+
+    b = {}
+    for i in allStates():
+        newA = []
+        for a in allValidActions(i):
+            newA.append(a)
+        b[i] = newA
+    C = {}    
     iterations = 0
+    gamma = 1
     q = {}    
-    C = {}
     newq = {}
     targetPolicy = {}
     for i in allQ():
@@ -128,17 +139,13 @@ def main():
             newq[i,a] = q[i, a]
         targetPolicy[i] = max(newq, key=newq.get)[1]
 
-    while iterations < 1:
-        game = environment(0,0, 9,0,raceTrack, StartingPos)
-        b = {}
-        for i in allStates():
-            newA = []
-            for a in allValidActions(i):
-                newA.append(a)
-            b[i] = newA
+    while iterations < 1000:
+        y,x = StartingPos[randint(0, len(StartingPos)-1)]
+        game = environment(0,0, y,x,raceTrack, StartingPos)
         G = 0
-        W = 1
+        W = 1.0
         R = -1
+        #s for state, a for action and r for reward
         sar = []
         playing = True
         while playing:
@@ -149,12 +156,36 @@ def main():
             sar.append((state, action, -1))
             if ret == 1:
                 playing = False
-            
         
 
-        print(len(sar))
-        break
+        for val in reversed(sar):
+            G = gamma*G + val[2]
+            C[(val[0],val[1])] += W  
+            q[(val[0],val[1])] = q[(val[0],val[1])] + W/C[(val[0],val[1])] * (G-q[(val[0],val[1])])
+            newq = {}
+            for a in allValidActions(val[0]):
+                newq[(val[0], val[1])] = q[(val[0],val[1])]
+            targetPolicy[val[0]] = max(newq, key=newq.get)[1]
+            if val[1] == targetPolicy[val[0]]:
+                W *= len(b[state]) 
+            else:
+                break
+
+        print(iterations)
         iterations += 1 
+    
+
+    y,x = StartingPos[randint(0, len(StartingPos)-1)]
+    game = environment(0,0, y,x,raceTrack, StartingPos)
+    playing = True
+    while playing:
+        state = game.state()
+        print(state)
+        action = targetPolicy[state]
+        game.Action(action[0], action[1])
+        ret = game.move()
+        if ret == 1:
+            playing = False
 
         
 
