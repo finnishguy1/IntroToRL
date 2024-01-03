@@ -2,7 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from random import choice
-from math import floor
+from itertools import product
+
+def allStates():
+   return list(product(product(np.arange(n), np.arange(m)), product(np.arange(6), np.arange(6)))) 
+
+def allActions():
+    return list(np.product(np.arange(-1,2), np.arange(-1,2)))
 
 def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
@@ -14,51 +20,42 @@ class environment:
         self.dx=dx
         self.y=y
         self.x=x
-        self.finish = False
         self.map = map
         self.startingPos = startingPos
 
-
-
-
-    def isWithinBound(self):
-        return True if raceTrack[(self.y, self.x)] == 1 else False
-
-    def end(self):
-        return self.finish
         
     def move(self):
         oldY = self.y
         oldX = self.x
         self.y -= self.dy
         self.x += self.dx
-        inside = self.isWithinBound()
-        print(self.y, self.x)
-        if inside == True:
-            print("Your in")
-            return((self.y, self.x))
-        elif self.x >= n and self.y <= m:
-            print("you win")
-        else:
-            print("you lose") #reset y and x to a random starting pos, yaya
+        finished = self.projectedPath(oldY, oldX)
+        try:
+            if finished == True:
+                return 1
+            elif finished == False:
+                self.y, self.x = raceTrack[self.y, self.x]
+                return 0
+        except:
+            return 0
 
     #checks to make sure projeceted path is all within bounds
     def projectedPath(self, oldY, oldX):
-        #cus rounding in python got me bricked
-        def normal_round(value):
-            return floor(value + 0.5)
-        
-        Projected = []
-        deltaX = self.dx/(self.dx+self.dy)
-        deltaY = self.dy/(self.dx+self.dy)
+        deltaX = self.dx/(self.dx+self.dy+0.0000001)
+        deltaY = self.dy/(self.dx+self.dy+0.0000001)
         for i in range(self.dx+self.dy):
             oldX += deltaX
             oldY -= deltaY
-            Projected.append((normal_round(oldY),normal_round(oldX)))
-        if set(Projected).issubset(self.map):
-            print("yay")
-        else:
-            print("wuh uh")
+            pos = raceTrack[round(oldY), round(oldX)]
+            if pos == 1:
+                pass
+            elif pos == 2:
+                return True
+            elif pos in StartingPos:
+                self.dy, self.dx = 0,0
+                return False
+            
+
 
 
     def Action(self, ndy, ndx):
@@ -68,6 +65,8 @@ class environment:
         self.dx = clamp(self.dx, 1, 5)
         self.dy = clamp(self.dy, 1, 5)
 
+
+
 def newStart():
     new = choice(StartingPos)
     return new
@@ -76,7 +75,7 @@ def newStart():
 raceTrack = defaultdict(newStart)
 StartingPos = []
 n, m = (0, 0)
-with open("map.txt","r") as f:
+with open("IntroToRL/map.txt","r") as f:
     content = f.read()
     n = len(content.split("\n"))
     for i, line in enumerate(content.split("\n")):
@@ -96,10 +95,10 @@ with open("map.txt","r") as f:
 
 
 def main():
-    pata = environment(1, 1, 0, 25, raceTrack, StartingPos)
+    pata = environment(1, 1, 2, 23, raceTrack, StartingPos)
     pata.move()
     pata.move()
-
+    print(allStates())
     
 
 
