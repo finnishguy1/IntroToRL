@@ -77,8 +77,6 @@ class environment:
         self.dx += ndx
         self.dy += ndy
 
-        self.dx = clamp(self.dx, 1, 5)
-        self.dy = clamp(self.dy, 1, 5)
 
 
 
@@ -139,7 +137,7 @@ def main():
             newq[i,a] = q[i, a]
         targetPolicy[i] = max(newq, key=newq.get)[1]
 
-    while iterations < 100000:
+    while iterations < 10000:
         y,x = StartingPos[randint(0, len(StartingPos)-1)]
         game = environment(0,0, y,x,raceTrack, StartingPos)
         G = 0
@@ -159,7 +157,7 @@ def main():
         
 
         for val in reversed(sar):
-            if W == 0:
+            if W > 10000:
                 break
             G = gamma*G + val[2]
             C[(val[0],val[1])] += W  
@@ -169,7 +167,8 @@ def main():
                 newq[(val[0], val[1])] = q[(val[0],val[1])]
             targetPolicy[val[0]] = max(newq, key=newq.get)[1]
             if val[1] == targetPolicy[val[0]]:
-                W *= 1/len(b[state]) 
+                W *= len(b[state])
+                print("yay")
             else:
                 break
 
@@ -178,16 +177,22 @@ def main():
     
 
     y,x = StartingPos[randint(0, len(StartingPos)-1)]
+    print(y,x)
     game = environment(0,0, y,x,raceTrack, StartingPos)
     playing = True
     while playing:
         state = game.state()
         action = targetPolicy[state]
+        print(state)
         print(action)
         game.Action(action[0], action[1])
         ret = game.move()
         if ret == 1:
             playing = False
+
+    for Q in allQ():
+        if Q[0][0] in StartingPos and Q[0][1] == (0,0):
+            print(f"{Q} : {q[Q]} ")
 
         
 
