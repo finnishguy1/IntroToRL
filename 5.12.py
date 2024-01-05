@@ -137,7 +137,7 @@ def main():
             newq[i,a] = q[i, a]
         targetPolicy[i] = max(newq, key=newq.get)[1]
 
-    while iterations < 100000:
+    while iterations < 1000:
         y,x = StartingPos[randint(0, len(StartingPos)-1)]
         game = environment(0,0, y,x,raceTrack, StartingPos)
         G = 0

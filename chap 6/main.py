@@ -22,7 +22,7 @@ def main():
 
        
 
-        while i < 10000:
+        while i < 1000:
                 playing = True
                 actionnr = 0
                 actionlist = []
@@ -62,6 +62,7 @@ def main():
                                 
                         
                 i += 1
+                print(i)
         
         
         playing = True
@@ -69,31 +70,24 @@ def main():
         actionlist = []
         oldstate = env.getState()
 
-        if random.random() < epsilon:
-                action = random.choice(environment.allActions())
-                actionlist.append(action)
-        else:
-                newq = {}
-                for a in environment.allActions():
-                        newq[(oldstate, a)] = q[(oldstate, a)]
-                action = max(newq, key=newq.get)[1]
-                actionlist.append(action)
+       
+        newq = {}
+        for a in environment.allActions():
+                newq[(oldstate, a)] = q[(oldstate, a)]
+        action = max(newq, key=newq.get)[1]
+        actionlist.append(action)
 
         
         while playing:
                 oldstate = env.getState() 
                 ret = env.move(actionlist[actionnr])
                 state = env.getState()
-
-                if random.random() < epsilon:
-                        action = random.choice(environment.allActions())
-                        actionlist.append(action)
-                else:
-                        newq = {}
-                        for a in environment.allActions():
-                                newq[(state, a)] = q[(state, a)]
-                        action = max(newq, key=newq.get)[1]
-                        actionlist.append(action)
+                 
+                newq = {}
+                for a in environment.allActions():
+                        newq[(state, a)] = q[(state, a)]
+                action = max(newq, key=newq.get)[1]
+                actionlist.append(action)
                 
                 q[(oldstate, actionlist[actionnr])] += alpha*(-1+gamma*q[(state, actionlist[actionnr+1])]-q[oldstate, actionlist[actionnr]] )
                 actionnr += 1
