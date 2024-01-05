@@ -37,7 +37,7 @@ class windyGrid:
                 ret = self.win()
                 if ret:
                         return 1
-                self.y += self.grid[self.x]
+                self.y -= self.grid[self.x]
                 self.y = clamp(self.y, self.height-1, 0)
                 ret = self.win()
                 if ret:

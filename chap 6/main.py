@@ -8,7 +8,7 @@ def main():
         gamma = 1
         wind = [0,0,0,1,1,1,2,2,1,0]
         q = {}
-        env = environment.windyGrid(8, 10, 4,0 , (4,7), wind)
+        env = environment.windyGrid(8, 10, 3,0 , (3,7), wind)
         reward = -1
         action = 0
         i= 0
@@ -91,7 +91,7 @@ def main():
                 
                 q[(oldstate, actionlist[actionnr])] += alpha*(-1+gamma*q[(state, actionlist[actionnr+1])]-q[oldstate, actionlist[actionnr]] )
                 actionnr += 1
-                print(state)
+                print(oldstate)
                 if ret == 1:
                         playing = False
 
